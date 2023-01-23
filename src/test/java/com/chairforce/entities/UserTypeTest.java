@@ -11,7 +11,7 @@ public class UserTypeTest {
     List<String> requestBodyList = List.of("firstName", "lastName", "age", "email");
 
     @Test
-    @DisplayName("Should return requestBodyList when body is the requestType")
+    @DisplayName("Should return requestBodyList when `body` is the requestType")
     public void requiredUserValuesTest_returnsRequestBodyList() {
         //arrange
         List<String> expected = requestBodyList;
@@ -24,7 +24,7 @@ public class UserTypeTest {
     }
 
     @Test
-    @DisplayName("Should return pathParameterList when pathParameters is the requestType")
+    @DisplayName("Should return pathParameterList when `pathParameters` is the requestType")
     public void requiredUserValuesTest_returnsPathParametersList() {
         //arrange
         List<String> expected = pathParameterList;
