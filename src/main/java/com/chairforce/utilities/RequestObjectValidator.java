@@ -8,6 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * <p> This is the javadoc for the class RequestObjectValidator. The RequestObjectValidator is a public abstract class
+ * that is used to validate a JsonObject request. </p>
+ *
+ * <p> It has one public static method called validateRequest()  which takes a {@link JsonObject}
+ * as a parameter and returns a boolean. </p>
+ *
+ * @author mosse
+ */
 public abstract class RequestObjectValidator {
 
     private static final String QUERY_STRING_PARAMETERS = "queryStringParameters";
@@ -23,6 +32,21 @@ public abstract class RequestObjectValidator {
 
     }
 
+    /**
+     * <p> A public static method used to validate requests. Takes {@link JsonObject} as a parameter and returns
+     * a boolean. </p>
+     *
+     * <p> The method starts by assigning the jsonObject parameter to the requestObj field.
+     * Then it checks if the request has a valid request type, valid keys, and valid values.</p>
+     * <p>This method throws no exception.</p>
+     *
+     * @param jsonObject request object coming in from lambda.
+     *
+     * @return If all the checks pass, it sets the {@code requestObj} in the {@link LambdaStatus} instance and
+     * returns {@code true}. Otherwise, it returns {@code false}.
+     *
+     * @author mosse
+     */
     public static boolean validateRequest(JsonObject jsonObject) {
         requestObj = jsonObject;
         if (hasValidRequestType() && hasValidKeys() && hasValidValues()) {

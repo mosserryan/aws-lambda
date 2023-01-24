@@ -14,15 +14,14 @@ public class RequestObjectValidatorTest {
     LambdaStatus lambdaStatus = LambdaStatus.getInstance();
 
     @Test
-    @DisplayName("Returns true when valid input stream is passed.")
-    public void testRequestObjectValidator_returnsTrue() throws FileNotFoundException {
+    @DisplayName("Returns true when valid pathParameters are passed.")
+    public void testRequestObjectValidator_withPathParameters_returnsTrue() {
         //Arrange
-        InputStream validInput = new FileInputStream("src/test/resources/GetUser");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(validInput));
-        JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+        String getUserJson = "{\"pathParameters\": {\"userId\": \"valid Id\"}}";
+        JsonObject getUserRequest = JsonParser.parseString(getUserJson).getAsJsonObject();
 
         //Act
-        boolean isSuccessful = RequestObjectValidator.validateRequest(jsonObject);
+        boolean isSuccessful = RequestObjectValidator.validateRequest(getUserRequest);
         JsonObject actual = JsonParser.parseString("{\"userId\":\"valid Id\"}").getAsJsonObject();
 
         //Assert
@@ -31,12 +30,33 @@ public class RequestObjectValidatorTest {
     }
 
     @Test
-    @DisplayName("Returns false when request pattern is invalid.")
-    public void testRequestObjectValidator_returnsFalse_whenRequestPatternInvalid() throws FileNotFoundException {
+    @DisplayName("Returns true when valid request body is passed.")
+    public void testRequestObjectValidator_withRequestBody_returnsTrue() {
         //Arrange
-        InputStream invalidInput = new FileInputStream("src/test/resources/GetUser_Invalid_PathParameters");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(invalidInput));
-        JsonObject invalidJsonObj = JsonParser.parseReader(reader).getAsJsonObject();
+        String createUserJson =
+                "{\"body\": {\"firstName\": \"Ryan\",\"lastName\": \"Mosser\",\"email\": \"ryanM@chairforce.com\",\"age\": \"30\"}}";
+        JsonObject createUserRequest = JsonParser.parseString(createUserJson).getAsJsonObject();
+
+        // Act
+        boolean isSuccessful = RequestObjectValidator.validateRequest(createUserRequest);
+        JsonObject actual = lambdaStatus.getRequestObj();
+        JsonObject expected = JsonParser.parseString(
+                "{\"firstName\": \"Ryan\"," +
+                        "\"lastName\": \"Mosser\"," +
+                        "\"email\": \"ryanM@chairforce.com\"," +
+                        "\"age\": \"30\"}").getAsJsonObject();
+
+        //Assert
+        assertEquals(expected, actual);
+        assertTrue(isSuccessful);
+    }
+
+    @Test
+    @DisplayName("Returns false when request pattern is invalid.")
+    public void testRequestObjectValidator_returnsFalse_whenRequestPatternInvalid() {
+        //Arrange
+        String invalidJson = "{\"\": {\"userId\": \"valid Id\"}}";
+        JsonObject invalidJsonObj = JsonParser.parseString(invalidJson).getAsJsonObject();
 
         //Act
         boolean isSuccessful = RequestObjectValidator.validateRequest(invalidJsonObj);
@@ -50,11 +70,10 @@ public class RequestObjectValidatorTest {
 
     @Test
     @DisplayName("Returns false when `userId` key is missing from input stream.")
-    public void testRequestObjectValidator_withValidPathParameters_returnsFalse_whenKeyInvalid() throws FileNotFoundException {
+    public void testRequestObjectValidator_withValidPathParameters_returnsFalse_whenKeyInvalid() {
         //Arrange
-        InputStream invalidInput = new FileInputStream("src/test/resources/GetUser_Invalid_UserId_Key");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(invalidInput));
-        JsonObject invalidJsonObj = JsonParser.parseReader(reader).getAsJsonObject();
+        String invalidJson = "{\"pathParameters\": {\"\": \"valid Id\"}}";
+        JsonObject invalidJsonObj = JsonParser.parseString(invalidJson).getAsJsonObject();
 
         //Act
         boolean isSuccessful = RequestObjectValidator.validateRequest(invalidJsonObj);
@@ -68,11 +87,10 @@ public class RequestObjectValidatorTest {
 
     @Test
     @DisplayName("Returns false when key value is null or missing.")
-    public void testRequestObjectValidator_withValidKey_returnsFalse_whenValueInvalid() throws FileNotFoundException {
+    public void testRequestObjectValidator_withValidKey_returnsFalse_whenValueInvalid() {
         //Arrange
-        InputStream invalidInput = new FileInputStream("src/test/resources/GetUser_Invalid_UserId_Value");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(invalidInput));
-        JsonObject invalidJsonObj = JsonParser.parseReader(reader).getAsJsonObject();
+        String invalidJson = "{\"pathParameters\": {\"userId\": \"\"}}";
+        JsonObject invalidJsonObj = JsonParser.parseString(invalidJson).getAsJsonObject();
 
         //Act
         boolean isSuccessful = RequestObjectValidator.validateRequest(invalidJsonObj);
