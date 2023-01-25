@@ -39,16 +39,18 @@ public class LambdaStatusTest {
     }
 
     @Test
-    @DisplayName("Test setter and getter for status message")
-    public void testSetAndGetStatusMsg() {
-        // Arrange
-        String statusMsg = "status message";
+    @DisplayName("Test setter and getter for request object")
+    public void testSetAndGetRequestObjAsString() {
+        //Arrange
+        JsonObject requestObj = new JsonObject();
+        requestObj.addProperty("key", "value");
         LambdaStatus instance = LambdaStatus.getInstance();
 
         // Act
-        instance.setStatusMsg(statusMsg);
+        instance.setRequestObj(requestObj);
 
         // Assert
-        assertEquals(statusMsg, instance.getStatusMsg());
+        assertEquals(requestObj.toString(), instance.getRequestObjAsString());
     }
+
 }

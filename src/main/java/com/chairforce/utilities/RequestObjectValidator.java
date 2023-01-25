@@ -65,7 +65,7 @@ public abstract class RequestObjectValidator {
                 return true;
             }
         }
-        lambdaStatus.setStatusMsg("Must send a valid request pattern.");
+        lambdaStatus.log("Must send a valid request pattern.");
         return false;
     }
 
@@ -73,7 +73,7 @@ public abstract class RequestObjectValidator {
         Set<String> keys = requestObj.keySet();
         for (String value : requiredKeyValues) {
             if (!keys.contains(value)) {
-                lambdaStatus.setStatusMsg("Expected key of `" + value + "` is missing.");
+                lambdaStatus.log("Expected key of `" + value + "` is missing.");
                 return false;
             }
         }
@@ -84,7 +84,7 @@ public abstract class RequestObjectValidator {
         Map<String, JsonElement> values = requestObj.asMap();
         for (Map.Entry<String, JsonElement> entry : values.entrySet()) {
             if (entry.getValue().isJsonNull() || entry.getValue().getAsString().isBlank()) {
-                lambdaStatus.setStatusMsg("Key value of `" + entry.getKey() + "` cannot be null or empty.");
+                lambdaStatus.log("Key value of `" + entry.getKey() + "` cannot be null or empty.");
                 return false;
             }
         }
