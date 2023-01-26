@@ -34,4 +34,9 @@ public class UserUtil {
         String userId = jsonElement.getAsJsonObject().get(UserType.USER_ID.value).getAsString();
         return this.userDynamoDbDao.deleteUserById(userId);
     }
+
+    public String convertUserToJson(User user) {
+       return gson.toJson(user);
+    }
+
 }

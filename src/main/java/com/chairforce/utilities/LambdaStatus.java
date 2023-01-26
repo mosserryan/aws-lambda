@@ -9,9 +9,10 @@ import javax.inject.Singleton;
 @Singleton
 public class LambdaStatus {
     private static LambdaStatus INSTANCE;
-    private JsonObject response;
     private LambdaLogger lambdaLogger;
-    Gson gson = new Gson();
+    private JsonObject request = new JsonObject();
+    private final JsonObject response = new JsonObject();
+    private final Gson gson = new Gson();
 
     private LambdaStatus() {
     }
@@ -23,15 +24,30 @@ public class LambdaStatus {
         return INSTANCE;
     }
 
-    public void setRequestObj(JsonObject response) {
-        this.response = response;
+    public void setRequestObj(JsonObject request) {
+        this.request = request;
     }
 
     public JsonObject getRequestObj() {
-        return this.response;
+        return this.request;
     }
 
     public String getRequestObjAsString() {
+        return gson.toJson(this.request);
+    }
+
+    public void addResponseProperty(String key, int value) {
+        this.response.addProperty(key, value);
+    }
+
+    public void addResponseBody(String userJson) {
+        JsonObject body = new JsonObject();
+        body.addProperty("user", userJson);
+        this.response.addProperty("body", gson.toJson(body).replaceAll("\\\\", ""));
+
+    }
+
+    public String getResponseObjAsString() {
         return gson.toJson(this.response);
     }
 

@@ -25,7 +25,6 @@ public class GetUserLambda implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-
         LambdaLogger lambdaLogger = context.getLogger();
         lambdaStatus.setLambdaLogger(lambdaLogger);
 
@@ -46,22 +45,21 @@ public class GetUserLambda implements RequestStreamHandler {
         }
 
         Optional<User> user = userUtil.getUserFromJson(lambdaStatus.getRequestObjAsString());
-        JsonObject responseBody = new JsonObject();
         if (user.isEmpty()) {
-            lambdaStatus.log("Could not find specified user, with supplied input:");
-            responseBody.addProperty("statusCode", "404");
+            lambdaStatus.log("Could not find specified User, with supplied input of: " + lambdaStatus.getRequestObjAsString());
+            lambdaStatus.addResponseProperty("statusCode", 404);
+            lambdaStatus.addResponseBody("[]");
         } else {
-            lambdaStatus.log("Successfully found the following user:" + user.get());
-            responseBody.addProperty("statusCode", "200");
+            String userJson = userUtil.convertUserToJson(user.get());
+            lambdaStatus.log("Successfully found the following User: " + userJson);
+            lambdaStatus.addResponseProperty("statusCode", 200);
+            lambdaStatus.addResponseBody(userJson);
         }
 
-        JsonObject responseObject = new JsonObject();
-        responseObject.addProperty("body", responseBody.toString());
-
-        writer.write(responseObject.toString());
+        lambdaStatus.log(lambdaStatus.getResponseObjAsString());
+        writer.write(lambdaStatus.getResponseObjAsString());
         writer.close();
         reader.close();
-
     }
 
 }
