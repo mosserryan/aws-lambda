@@ -41,19 +41,23 @@ public class GetUserLambda implements RequestStreamHandler {
         }
 
         if (!RequestObjectValidator.validateRequest(jsonObject)) {
+            lambdaStatus.log(lambdaStatus.getResponseObjAsString());
+            writer.write(lambdaStatus.getResponseObjAsString());
+            writer.close();
+            reader.close();
             return;
         }
 
         Optional<User> user = userUtil.getUserFromJson(lambdaStatus.getRequestObjAsString());
         if (user.isEmpty()) {
             lambdaStatus.log("Could not find specified User, with supplied input of: " + lambdaStatus.getRequestObjAsString());
-            lambdaStatus.addResponseProperty("statusCode", 404);
-            lambdaStatus.addResponseBody("[]");
+            lambdaStatus.addResponseCodeProperty(404);
+            lambdaStatus.addResponseBody("user","[]");
         } else {
             String userJson = userUtil.convertUserToJson(user.get());
             lambdaStatus.log("Successfully found the following User: " + userJson);
-            lambdaStatus.addResponseProperty("statusCode", 200);
-            lambdaStatus.addResponseBody(userJson);
+            lambdaStatus.addResponseCodeProperty(200);
+            lambdaStatus.addResponseBody("user", userJson);
         }
 
         lambdaStatus.log(lambdaStatus.getResponseObjAsString());
