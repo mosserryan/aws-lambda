@@ -53,6 +53,7 @@ public abstract class RequestObjectValidator {
             lambdaStatus.setRequestObj(requestObj);
             return true;
         }
+        lambdaStatus.setRequestObj(requestObj);
         return false;
     }
 

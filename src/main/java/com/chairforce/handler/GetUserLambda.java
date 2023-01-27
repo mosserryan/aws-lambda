@@ -41,7 +41,8 @@ public class GetUserLambda implements RequestStreamHandler {
         }
 
         if (!RequestObjectValidator.validateRequest(jsonObject)) {
-            lambdaStatus.log(lambdaStatus.getResponseObjAsString());
+            lambdaStatus.addResponseCodeProperty(404);
+            lambdaStatus.log("Unable to validate invalid request of: " + lambdaStatus.getRequestObjAsString());
             writer.write(lambdaStatus.getResponseObjAsString());
             writer.close();
             reader.close();
@@ -60,7 +61,6 @@ public class GetUserLambda implements RequestStreamHandler {
             lambdaStatus.addResponseBody("user", userJson);
         }
 
-        lambdaStatus.log(lambdaStatus.getResponseObjAsString());
         writer.write(lambdaStatus.getResponseObjAsString());
         writer.close();
         reader.close();
