@@ -26,12 +26,12 @@ public class UserDynamoDbDao {
     }
 
     public Optional<User> deleteUserById(String userId) {
-        Optional<User> user = getUserById(userId);
-        if (user.isEmpty()) {
+        Optional<User> deletedUser = getUserById(userId);
+        if (deletedUser.isEmpty()) {
             return Optional.empty();
         } else {
-            dynamoDBMapper.delete(user.get());
-            return user;
+            dynamoDBMapper.delete(deletedUser.get());
+            return deletedUser;
         }
     }
 

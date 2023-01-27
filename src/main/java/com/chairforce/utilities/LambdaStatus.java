@@ -36,15 +36,14 @@ public class LambdaStatus {
         return gson.toJson(this.request);
     }
 
-    public void addResponseProperty(String key, int value) {
-        this.response.addProperty(key, value);
+    public void addResponseCodeProperty(int value) {
+        this.response.addProperty("statusCode", value);
     }
 
-    public void addResponseBody(String userJson) {
+    public void addResponseBody(String key, String value) {
         JsonObject body = new JsonObject();
-        body.addProperty("user", userJson);
+        body.addProperty(key, value);
         this.response.addProperty("body", gson.toJson(body).replaceAll("\\\\", ""));
-
     }
 
     public String getResponseObjAsString() {
