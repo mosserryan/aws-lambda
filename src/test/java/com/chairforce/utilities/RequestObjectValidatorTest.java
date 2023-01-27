@@ -1,36 +1,15 @@
 package com.chairforce.utilities;
 
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
+import org.junit.jupiter.api.Test;
 
-@RunWith(MockitoJUnitRunner.class)//without this runner - mocks would be "null"
+import static org.junit.jupiter.api.Assertions.*;
+
 public class RequestObjectValidatorTest {
 
     LambdaStatus lambdaStatus = LambdaStatus.getInstance();
-
-    @Mock LambdaLogger loggerMock;
-
-    @Before
-    public void setUp() {
-
-        doAnswer(call -> {
-            System.out.println((String)call.getArgument(0));//print to the console
-            return null;
-        }).when(loggerMock).log(anyString());
-
-        lambdaStatus.setLambdaLogger(loggerMock);
-
-    }
 
     @Test
     @DisplayName("Returns true when valid pathParameters are passed.")
