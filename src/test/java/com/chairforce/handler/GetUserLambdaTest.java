@@ -2,25 +2,29 @@ package com.chairforce.handler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.io.*;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)//without this runner - mocks would be "null"
+@ExtendWith(MockitoExtension.class)
 public class GetUserLambdaTest {
 
     static GetUserLambda getUserLambda;
-    @Mock Context mockedContext;
-    @Mock LambdaLogger loggerMock;
+    @Mock
+    Context mockedContext;
+    @Mock
+    LambdaLogger loggerMock;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(mockedContext.getLogger()).thenReturn(loggerMock);
 
