@@ -1,12 +1,29 @@
 package com.chairforce.utilities;
 
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.google.gson.JsonObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 public class LambdaStatusTest {
+
+    @Mock LambdaLogger mockLambdaLogger;
+    LambdaStatus instance;
+
+    @BeforeEach
+    public void setup () throws Exception {
+        resetSingleton();
+        instance = LambdaStatus.getInstance();
+    }
 
     @Test
     @DisplayName("Test that LambdaStatus is a singleton")
@@ -29,13 +46,12 @@ public class LambdaStatusTest {
         //Arrange
         JsonObject requestObj = new JsonObject();
         requestObj.addProperty("key", "value");
-        LambdaStatus instance = LambdaStatus.getInstance();
 
         // Act
-        instance.setRequestObj(requestObj);
+        instance.setRequest(requestObj);
 
         // Assert
-        assertEquals(requestObj, instance.getRequestObj());
+        assertEquals(requestObj, instance.getRequest());
     }
 
     @Test
@@ -44,13 +60,39 @@ public class LambdaStatusTest {
         //Arrange
         JsonObject requestObj = new JsonObject();
         requestObj.addProperty("key", "value");
-        LambdaStatus instance = LambdaStatus.getInstance();
 
         // Act
-        instance.setRequestObj(requestObj);
+        instance.setRequest(requestObj);
 
         // Assert
-        assertEquals(requestObj.toString(), instance.getRequestObjAsString());
+        assertEquals(requestObj.toString(), instance.getRequestAsString());
+    }
+
+    @Test
+    public void testSetLambdaLogger() {
+        // Arrange - Act
+        instance.setLambdaLogger(mockLambdaLogger);
+
+        // Assert
+        assertEquals(mockLambdaLogger, instance.getLambdaLogger());
+    }
+
+    @Test
+    public void testLog() {
+        // Arrange
+        instance.setLambdaLogger(mockLambdaLogger);
+
+        // Act
+        instance.log("test message");
+
+        // Assert
+        verify(mockLambdaLogger).log("test message");
+    }
+
+    public void resetSingleton() throws Exception {
+        Field instance = LambdaStatus.class.getDeclaredField("INSTANCE");
+        instance.setAccessible(true);
+        instance.set(null, null);
     }
 
 }

@@ -3,10 +3,14 @@ package com.chairforce.utilities;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.inject.Singleton;
 
 @Singleton
+@Getter
+@Setter
 public class LambdaStatus {
     private static LambdaStatus INSTANCE;
     private LambdaLogger lambdaLogger;
@@ -24,30 +28,8 @@ public class LambdaStatus {
         return INSTANCE;
     }
 
-    public void setRequestObj(JsonObject request) {
-        this.request = request;
-    }
-
-    public JsonObject getRequestObj() {
-        return this.request;
-    }
-
-    public String getRequestObjAsString() {
+    public String getRequestAsString() {
         return gson.toJson(this.request);
-    }
-
-    public void addResponseCodeProperty(int value) {
-        this.response.addProperty("statusCode", value);
-    }
-
-    public void addResponseBody(String key, String value) {
-        JsonObject body = new JsonObject();
-        body.addProperty(key, value);
-        this.response.addProperty("body", gson.toJson(body).replaceAll("\\\\", ""));
-    }
-
-    public String getResponseObjAsString() {
-        return gson.toJson(this.response);
     }
 
     public void setLambdaLogger(LambdaLogger lambdaLogger) {
@@ -57,5 +39,4 @@ public class LambdaStatus {
     public void log(String message) {
         lambdaLogger.log(message);
     }
-
 }

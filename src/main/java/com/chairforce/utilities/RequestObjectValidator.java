@@ -48,16 +48,19 @@ public abstract class RequestObjectValidator {
      * @author mosserryan
      */
     public static boolean validateRequest(JsonObject jsonObject) {
+        // TODO create separate requestBuilder that is responsible for building the request object.
         requestObj = jsonObject;
         if (hasValidRequestType() && hasValidKeys() && hasValidValues()) {
-            lambdaStatus.setRequestObj(requestObj);
+            lambdaStatus.log("Response has been successfully validated");
+            lambdaStatus.setRequest(requestObj);
             return true;
         }
-        lambdaStatus.setRequestObj(requestObj);
+        lambdaStatus.setRequest(requestObj);
         return false;
     }
 
     private static boolean hasValidRequestType() {
+        // TODO Move keys into their own ENUM class
         String[] keys = {PATH_PARAMETERS, QUERY_STRING_PARAMETERS, REQUEST_BODY};
         for (String key : keys) {
             if (requestObj.has(key)) {
@@ -66,7 +69,7 @@ public abstract class RequestObjectValidator {
                 return true;
             }
         }
-        lambdaStatus.addResponseBody("errorMessage", "Invalid request of " + requestObj + ", must send a valid request pattern.");
+        lambdaStatus.log("Invalid request of " + requestObj + ", must send a valid request pattern.");
         return false;
     }
 
@@ -74,7 +77,7 @@ public abstract class RequestObjectValidator {
         Set<String> keys = requestObj.keySet();
         for (String value : requiredKeyValues) {
             if (!keys.contains(value)) {
-                lambdaStatus.addResponseBody("errorMessage", "Expected key of `" + value + "` is missing.");
+                lambdaStatus.log("Expected key of `" + value + "` is missing.");
                 return false;
             }
         }
@@ -85,7 +88,7 @@ public abstract class RequestObjectValidator {
         Map<String, JsonElement> values = requestObj.asMap();
         for (Map.Entry<String, JsonElement> entry : values.entrySet()) {
             if (entry.getValue().isJsonNull() || entry.getValue().getAsString().isBlank()) {
-                lambdaStatus.addResponseBody("errorMessage", "Key value of `" + entry.getKey() + "` cannot be null or empty.");
+                lambdaStatus.log("Key value of `" + entry.getKey() + "` cannot be null or empty.");
                 return false;
             }
         }

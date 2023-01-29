@@ -1,4 +1,4 @@
-package com.chairforce.handler;//package com.chairforce.handler;
+package com.chairforce.handler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
@@ -46,7 +46,7 @@ public class GetUserLambdaTest {
     }
 
     @Test
-    void handleRequest_validInput_validOutput() throws IOException {
+    void handleRequest_validInput_validOutput_Error404() throws IOException {
         // Arrange
         inputStream = new ByteArrayInputStream(VALID_PATH_PARAM_JSON.getBytes());
         when(mockedUserUtil.getUserFromJson(anyString())).thenReturn(Optional.empty());
@@ -56,7 +56,7 @@ public class GetUserLambdaTest {
         JsonObject response = JsonParser.parseString(outputStream.toString()).getAsJsonObject();
         int expectedStatusCode = 404;
         int actualStatusCode = response.get("statusCode").getAsInt();
-        String expectedBody = "{\"user\":\"[]\"}";
+        String expectedBody = "Resource not found";
         String actualBody = response.get("body").getAsString();
 
         // Assert
@@ -64,11 +64,12 @@ public class GetUserLambdaTest {
         assertEquals(expectedBody, actualBody);
 
         verify(mockedContext, times(1)).getLogger();
-        verify(loggerMock, times(1)).log("Could not find specified User, with supplied input of: {\"userId\":\"validId\"}");
+        verify(loggerMock, times(1)).log(
+                "Could not find specified User, with supplied input of: {\"userId\":\"validId\"}");
     }
 
     @Test
-    void handleRequest_inValidInput_validOutput() throws IOException {
+    void handleRequest_validInput_validOutput_Success200() throws IOException {
         // Arrange
         inputStream = new ByteArrayInputStream(VALID_PATH_PARAM_JSON.getBytes());
         when(mockedUserUtil.getUserFromJson(anyString())).thenReturn(Optional.of(new User()));
@@ -84,11 +85,12 @@ public class GetUserLambdaTest {
         JsonObject response = JsonParser.parseString(outputStream.toString()).getAsJsonObject();
         int expectedStatusCode = 200;
         int actualStatusCode = response.get("statusCode").getAsInt();
-        String expectedBody = "{\"user\":\"{\"userId\":\"validId\"" +
-                    ",\"firstName\":\"John\"" +
-                    ",\"lastName\":\"testUser\"" +
-                    ",\"email\":\"testUser\"" +
-                    ",\"age\":\"10\" }\"}";
+        String expectedBody =
+                "{\"user\":{\"userId\":\"validId\"" +
+                ",\"firstName\":\"John\"" +
+                ",\"lastName\":\"testUser\"" +
+                ",\"email\":\"testUser\"" +
+                ",\"age\":\"10\"}}";
         String actualBody = response.get("body").getAsString();
 
         // Assert
@@ -105,7 +107,7 @@ public class GetUserLambdaTest {
     }
 
     @Test
-    void handleRequest_InValidInputParam() throws IOException {
+    void handleRequest_InValidInputParam_Error400() throws IOException {
         // Arrange
         String INVALID_PATH_PARAM_JSON = "{\"notValid\": {\"userId\": \"validId\"}}";
         inputStream = new ByteArrayInputStream(INVALID_PATH_PARAM_JSON.getBytes());
@@ -113,9 +115,9 @@ public class GetUserLambdaTest {
         // Act
         getUserLambda.handleRequest(inputStream, outputStream, mockedContext);
         JsonObject response = JsonParser.parseString(outputStream.toString()).getAsJsonObject();
-        int expectedStatusCode = 404;
+        int expectedStatusCode = 400;
         int actualStatusCode = response.get("statusCode").getAsInt();
-        String expectedBody = "{\"errorMessage\":\"Invalid request of {\"notValid\":{\"userId\":\"validId\"}}, must send a valid request pattern.\"}";
+        String expectedBody = "Invalid request";
         String actualBody = response.get("body").getAsString();
 
         // Assert
@@ -123,7 +125,8 @@ public class GetUserLambdaTest {
         assertEquals(expectedBody, actualBody);
 
         verify(mockedContext, times(1)).getLogger();
-        verify(loggerMock, times(1)).log("Unable to validate invalid request of: {\"notValid\":{\"userId\":\"validId\"}}");
+        verify(loggerMock, times(1)).log(
+                "Unable to validate invalid request of: {\"notValid\":{\"userId\":\"validId\"}}");
     }
 
 }
