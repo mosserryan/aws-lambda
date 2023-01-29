@@ -46,7 +46,7 @@ public class GetUserLambdaTest {
     }
 
     @Test
-    void handleRequest_validInput_validOutput() throws IOException {
+    void handleRequest_validInput_validOutput_Error404() throws IOException {
         // Arrange
         inputStream = new ByteArrayInputStream(VALID_PATH_PARAM_JSON.getBytes());
         when(mockedUserUtil.getUserFromJson(anyString())).thenReturn(Optional.empty());
@@ -69,7 +69,7 @@ public class GetUserLambdaTest {
     }
 
     @Test
-    void handleRequest_inValidInput_validOutput() throws IOException {
+    void handleRequest_validInput_validOutput_Success200() throws IOException {
         // Arrange
         inputStream = new ByteArrayInputStream(VALID_PATH_PARAM_JSON.getBytes());
         when(mockedUserUtil.getUserFromJson(anyString())).thenReturn(Optional.of(new User()));
@@ -107,7 +107,7 @@ public class GetUserLambdaTest {
     }
 
     @Test
-    void handleRequest_InValidInputParam() throws IOException {
+    void handleRequest_InValidInputParam_Error400() throws IOException {
         // Arrange
         String INVALID_PATH_PARAM_JSON = "{\"notValid\": {\"userId\": \"validId\"}}";
         inputStream = new ByteArrayInputStream(INVALID_PATH_PARAM_JSON.getBytes());
