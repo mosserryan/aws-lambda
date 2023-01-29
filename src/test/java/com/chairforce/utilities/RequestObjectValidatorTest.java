@@ -1,15 +1,37 @@
 package com.chairforce.utilities;
 
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 
+@ExtendWith(MockitoExtension.class)
 public class RequestObjectValidatorTest {
 
     LambdaStatus lambdaStatus = LambdaStatus.getInstance();
+
+    @Mock LambdaLogger loggerMock;
+
+    @BeforeEach
+    public void setUp() {
+
+        lambdaStatus.setLambdaLogger(loggerMock);
+
+        doAnswer(call -> {
+            System.out.println((String)call.getArgument(0));//print to the console
+            return null;
+        }).when(loggerMock).log(anyString());
+
+    }
 
     @Test
     @DisplayName("Returns true when valid pathParameters are passed.")
@@ -23,7 +45,7 @@ public class RequestObjectValidatorTest {
         JsonObject actual = JsonParser.parseString("{\"userId\":\"valid Id\"}").getAsJsonObject();
 
         //Assert
-        assertEquals(lambdaStatus.getRequestObj(), actual);
+        assertEquals(lambdaStatus.getRequest(), actual);
         assertTrue(isSuccessful);
     }
 
@@ -37,7 +59,7 @@ public class RequestObjectValidatorTest {
 
         // Act
         boolean isSuccessful = RequestObjectValidator.validateRequest(createUserRequest);
-        JsonObject actual = lambdaStatus.getRequestObj();
+        JsonObject actual = lambdaStatus.getRequest();
         JsonObject expected = JsonParser.parseString(
                 "{\"firstName\": \"Ryan\"," +
                         "\"lastName\": \"Mosser\"," +
