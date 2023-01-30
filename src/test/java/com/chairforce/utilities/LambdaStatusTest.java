@@ -1,7 +1,6 @@
 package com.chairforce.utilities;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import com.google.gson.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,34 +37,6 @@ public class LambdaStatusTest {
 
         // Assert
         assertEquals(instance1Hash, instance2Hash);
-    }
-
-    @Test
-    @DisplayName("Test setter and getter for request object")
-    public void testSetAndGetRequestObj() {
-        //Arrange
-        JsonObject requestObj = new JsonObject();
-        requestObj.addProperty("key", "value");
-
-        // Act
-        instance.setRequest(requestObj);
-
-        // Assert
-        assertEquals(requestObj, instance.getRequest());
-    }
-
-    @Test
-    @DisplayName("Test setter and getter for request object")
-    public void testSetAndGetRequestObjAsString() {
-        //Arrange
-        JsonObject requestObj = new JsonObject();
-        requestObj.addProperty("key", "value");
-
-        // Act
-        instance.setRequest(requestObj);
-
-        // Assert
-        assertEquals(requestObj.toString(), instance.getRequestAsString());
     }
 
     @Test
