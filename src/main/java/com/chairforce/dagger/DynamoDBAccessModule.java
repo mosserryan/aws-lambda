@@ -1,5 +1,6 @@
 package com.chairforce.dagger;
 
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
@@ -40,6 +41,7 @@ public class DynamoDBAccessModule {
     public AmazonDynamoDB getAmazonDynamoDB() {
         return AmazonDynamoDBClientBuilder
                 .standard()
+                .withCredentials(new EnvironmentVariableCredentialsProvider())
                 .build();
     }
 }

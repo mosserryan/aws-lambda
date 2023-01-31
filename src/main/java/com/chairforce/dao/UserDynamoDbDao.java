@@ -37,7 +37,8 @@ public class UserDynamoDbDao {
 
     public Optional<User> updateUserById(String userId, User user) {
         ExpectedAttributeValue expectedAttributeValue = new ExpectedAttributeValue((new AttributeValue()).withS(userId));
-        DynamoDBSaveExpression dynamoDBSaveExpression = (new DynamoDBSaveExpression()).withExpectedEntry("UserId", expectedAttributeValue);
+        DynamoDBSaveExpression dynamoDBSaveExpression =
+                (new DynamoDBSaveExpression()).withExpectedEntry("UserId", expectedAttributeValue);
 
         Optional<User> targetUser = getUserById(userId);
         if (targetUser.isEmpty()) {
@@ -47,4 +48,5 @@ public class UserDynamoDbDao {
             return getUserById(userId);
         }
     }
+
 }

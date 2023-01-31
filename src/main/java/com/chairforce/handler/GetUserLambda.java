@@ -9,12 +9,10 @@ import com.chairforce.request.RequestWrapper;
 import com.chairforce.utilities.LambdaStatus;
 import com.chairforce.response.ResponseBuilder;
 import com.chairforce.utilities.UserUtil;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
-
+import com.google.gson.*;
 import java.io.*;
 import java.util.Optional;
+
 
 public class GetUserLambda implements RequestStreamHandler {
 
@@ -71,7 +69,7 @@ public class GetUserLambda implements RequestStreamHandler {
                     .build();
         }
 
-        //lambdaStatus.log(response.toString());
+        lambdaStatus.log(response.toString());
         writer.write(response.toString());
         writer.close();
         reader.close();
