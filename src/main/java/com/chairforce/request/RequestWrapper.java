@@ -52,15 +52,15 @@ public class RequestWrapper {
         } else {
             reqTypes = RequestType.getStringValues();
         }
-        for (String key : reqTypes) {
-            if (requestObj.has(key)) {
-                if (requestObj.get(key).isJsonPrimitive()) {
-                    String element = requestObj.get(key).getAsString();
+        for (String reqType : reqTypes) {
+            if (requestObj.has(reqType)) {
+                if (requestObj.get(reqType).isJsonPrimitive()) {
+                    String element = requestObj.get(reqType).getAsString();
                     requestObj = (JsonObject) JsonParser.parseString(element);
                 } else {
-                    requestObj = requestObj.get(key).getAsJsonObject();
+                    requestObj = requestObj.get(reqType).getAsJsonObject();
                 }
-                requiredKeyValues = UserType.requiredUserValues(key);
+                requiredKeyValues = UserType.requiredUserValues(reqType);
                 return true;
             }
         }

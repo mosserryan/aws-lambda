@@ -28,51 +28,48 @@ public class GetUserLambda implements RequestStreamHandler {
         LambdaLogger lambdaLogger = context.getLogger();
         lambdaStatus.setLambdaLogger(lambdaLogger);
         OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        BufferedReader reader;
-        JsonObject requestObj;
         try {
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-            requestObj = JsonParser.parseReader(reader).getAsJsonObject();
-        } catch (JsonParseException e) {
-            lambdaLogger.log(e.getMessage());
-            return;
-        }
 
-        RequestWrapper request = new RequestWrapper(requestObj);
-        JsonObject response;
-        if (!request.isValidRequest()) {
-            lambdaStatus.log("Unable to validate invalid request of: " + request.getRequestAsJson());
-            response = new ResponseBuilder()
-                    .setStatusCode(400)
-                    .setErrorBody("Invalid request")
-                    .build();
+            JsonObject requestObj = JsonParser.parseReader(reader).getAsJsonObject();
+            RequestWrapper request = new RequestWrapper(requestObj);
+            JsonObject response;
+            if (!request.isValidRequest()) {
+                lambdaStatus.log("Unable to validate invalid request of: " + request.getRequestAsJson());
+                response = new ResponseBuilder()
+                        .setStatusCode(400)
+                        .setErrorBody("Invalid request")
+                        .build();
+                writer.write(response.toString());
+                writer.close();
+                reader.close();
+                return;
+            }
+
+            Optional<User> user = userUtil.getUserFromJson(request.getRequestAsJson());
+            if (user.isEmpty()) {
+                lambdaStatus.log("Could not find specified User, with supplied input of: " + request.getRequestAsJson());
+                response = new ResponseBuilder()
+                        .setStatusCode(404)
+                        .setErrorBody("Resource not found")
+                        .build();
+            } else {
+                String userJson = userUtil.convertUserToJson(user.get());
+                lambdaStatus.log("Successfully found the following User: " + userJson);
+                response = new ResponseBuilder()
+                        .setStatusCode(200)
+                        .setSuccessBody(userJson)
+                        .build();
+            }
+
             writer.write(response.toString());
-            writer.close();
+        } catch (IllegalStateException | JsonSyntaxException exception) {
+            lambdaStatus.log(exception.toString());
+        } finally {
             reader.close();
-            return;
+            writer.close();
         }
-
-        Optional<User> user = userUtil.getUserFromJson(request.getRequestAsJson());
-        if (user.isEmpty()) {
-            lambdaStatus.log("Could not find specified User, with supplied input of: " + request.getRequestAsJson());
-            response = new ResponseBuilder()
-                    .setStatusCode(404)
-                    .setErrorBody("Resource not found")
-                    .build();
-        } else {
-            String userJson = userUtil.convertUserToJson(user.get());
-            lambdaStatus.log("Successfully found the following User: " + userJson);
-            response = new ResponseBuilder()
-                    .setStatusCode(200)
-                    .setSuccessBody(userJson)
-                    .build();
-        }
-
-        lambdaStatus.log(response.toString());
-        writer.write(response.toString());
-        writer.close();
-        reader.close();
     }
 
 }
