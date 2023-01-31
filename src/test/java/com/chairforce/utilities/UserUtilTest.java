@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +32,8 @@ public class UserUtilTest {
     @DisplayName("Test create user from json")
     public void testCreateUserFromJson() {
         // Arrange
-        String jsonString = "{\"userId\":\"1\",\"firstName\":\"testUser\",\"lastName\":\"testUser\",\"email\":\"testUser\",\"age\":\"10\" }";
+        String jsonString =
+                "{\"userId\":\"1\",\"firstName\":\"testUser\",\"lastName\":\"testUser\",\"email\":\"testUser\",\"age\":\"10\" }";
         User user = gson.fromJson(jsonString, User.class);
         Mockito.when(userDynamoDbDao.createUser(user)).thenReturn(user);
 
@@ -72,5 +72,21 @@ public class UserUtilTest {
 
         // Assert
         assertEquals(Optional.of(user), deletedUser);
+    }
+
+    @Test
+    @DisplayName("Test convert user to json")
+    public void testConvertUserToJson() {
+        // Arrange
+        String jsonString =
+                "{\"userId\":\"1\",\"firstName\":\"testUser\",\"lastName\":\"testUser\",\"email\":\"testUser\",\"age\":\"10\" }";
+        User user = gson.fromJson(jsonString, User.class);
+
+        // Act
+        String expected = gson.toJson(user);
+        String actual = userUtil.convertUserToJson(user);
+
+        //Assert
+        assertEquals(actual, expected);
     }
 }

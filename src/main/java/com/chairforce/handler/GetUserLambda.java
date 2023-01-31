@@ -5,21 +5,21 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.chairforce.dagger.DaggerConfig;
 import com.chairforce.entities.User;
-import com.chairforce.utilities.RequestObjectValidator;
+import com.chairforce.request.RequestWrapper;
 import com.chairforce.utilities.LambdaStatus;
-import com.chairforce.utilities.ResponseBuilder;
+import com.chairforce.response.ResponseBuilder;
 import com.chairforce.utilities.UserUtil;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+
 import java.io.*;
 import java.util.Optional;
 
 public class GetUserLambda implements RequestStreamHandler {
 
-    private final static LambdaStatus lambdaStatus = LambdaStatus.getInstance();
+    private final LambdaStatus lambdaStatus = LambdaStatus.getInstance();
     private final UserUtil userUtil;
-    private JsonObject response;
 
     public GetUserLambda() {
         userUtil = DaggerConfig.create().userUtil();
@@ -29,22 +29,22 @@ public class GetUserLambda implements RequestStreamHandler {
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         LambdaLogger lambdaLogger = context.getLogger();
         lambdaStatus.setLambdaLogger(lambdaLogger);
-
         OutputStreamWriter writer = new OutputStreamWriter(outputStream);
-        BufferedReader reader;
-        JsonObject request;
 
+        BufferedReader reader;
+        JsonObject requestObj;
         try {
             reader = new BufferedReader(new InputStreamReader(inputStream));
-            request = JsonParser.parseReader(reader).getAsJsonObject();
-        } catch (JsonSyntaxException e) {
+            requestObj = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (JsonParseException e) {
             lambdaLogger.log(e.getMessage());
             return;
         }
 
-        // TODO Subject to change, see TODO in RequestObjectValidator class
-        if (!RequestObjectValidator.validateRequest(request)) {
-            lambdaStatus.log("Unable to validate invalid request of: " + lambdaStatus.getRequestAsString());
+        RequestWrapper request = new RequestWrapper(requestObj);
+        JsonObject response;
+        if (!request.isValidRequest()) {
+            lambdaStatus.log("Unable to validate invalid request of: " + request.getRequestAsJson());
             response = new ResponseBuilder()
                     .setStatusCode(400)
                     .setErrorBody("Invalid request")
@@ -55,9 +55,9 @@ public class GetUserLambda implements RequestStreamHandler {
             return;
         }
 
-        Optional<User> user = userUtil.getUserFromJson(lambdaStatus.getRequestAsString());
+        Optional<User> user = userUtil.getUserFromJson(request.getRequestAsJson());
         if (user.isEmpty()) {
-            lambdaStatus.log("Could not find specified User, with supplied input of: " + lambdaStatus.getRequestAsString());
+            lambdaStatus.log("Could not find specified User, with supplied input of: " + request.getRequestAsJson());
             response = new ResponseBuilder()
                     .setStatusCode(404)
                     .setErrorBody("Resource not found")
@@ -71,8 +71,7 @@ public class GetUserLambda implements RequestStreamHandler {
                     .build();
         }
 
-        lambdaStatus.log(response.toString());
-
+        //lambdaStatus.log(response.toString());
         writer.write(response.toString());
         writer.close();
         reader.close();

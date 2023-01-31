@@ -1,6 +1,7 @@
-package com.chairforce.utilities;
+package com.chairforce.request;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.chairforce.utilities.LambdaStatus;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +16,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 
 @ExtendWith(MockitoExtension.class)
-public class RequestObjectValidatorTest {
+public class RequestWrapperTest {
 
     LambdaStatus lambdaStatus = LambdaStatus.getInstance();
 
@@ -39,13 +40,15 @@ public class RequestObjectValidatorTest {
         //Arrange
         String getUserJson = "{\"pathParameters\": {\"userId\": \"valid Id\"}}";
         JsonObject getUserRequest = JsonParser.parseString(getUserJson).getAsJsonObject();
+        RequestWrapper requestWrapper = new RequestWrapper(getUserRequest);
 
         //Act
-        boolean isSuccessful = RequestObjectValidator.validateRequest(getUserRequest);
+        boolean isSuccessful = requestWrapper.isValidRequest();
         JsonObject actual = JsonParser.parseString("{\"userId\":\"valid Id\"}").getAsJsonObject();
+        JsonObject expected = requestWrapper.getRequestObj();
 
         //Assert
-        assertEquals(lambdaStatus.getRequest(), actual);
+        assertEquals(expected, actual);
         assertTrue(isSuccessful);
     }
 
@@ -56,10 +59,11 @@ public class RequestObjectValidatorTest {
         String createUserJson =
                 "{\"body\": {\"firstName\": \"Ryan\",\"lastName\": \"Mosser\",\"email\": \"ryanM@chairforce.com\",\"age\": \"30\"}}";
         JsonObject createUserRequest = JsonParser.parseString(createUserJson).getAsJsonObject();
+        RequestWrapper requestWrapper = new RequestWrapper(createUserRequest);
 
         // Act
-        boolean isSuccessful = RequestObjectValidator.validateRequest(createUserRequest);
-        JsonObject actual = lambdaStatus.getRequest();
+        boolean isSuccessful = requestWrapper.isValidRequest();
+        JsonObject actual = requestWrapper.getRequestObj();
         JsonObject expected = JsonParser.parseString(
                 "{\"firstName\": \"Ryan\"," +
                         "\"lastName\": \"Mosser\"," +
@@ -77,9 +81,10 @@ public class RequestObjectValidatorTest {
         //Arrange
         String invalidJson = "{\"\": {\"userId\": \"valid Id\"}}";
         JsonObject invalidJsonObj = JsonParser.parseString(invalidJson).getAsJsonObject();
+        RequestWrapper requestWrapper = new RequestWrapper(invalidJsonObj);
 
         //Act
-        boolean isSuccessful = RequestObjectValidator.validateRequest(invalidJsonObj);
+        boolean isSuccessful = requestWrapper.isValidRequest();
 
         //Assert
         assertFalse(isSuccessful);
@@ -91,9 +96,10 @@ public class RequestObjectValidatorTest {
         //Arrange
         String invalidJson = "{\"pathParameters\": {\"\": \"valid Id\"}}";
         JsonObject invalidJsonObj = JsonParser.parseString(invalidJson).getAsJsonObject();
+        RequestWrapper requestWrapper = new RequestWrapper(invalidJsonObj);
 
         //Act
-        boolean isSuccessful = RequestObjectValidator.validateRequest(invalidJsonObj);
+        boolean isSuccessful = requestWrapper.isValidRequest();
 
         //Assert
         assertFalse(isSuccessful);
@@ -105,12 +111,29 @@ public class RequestObjectValidatorTest {
         //Arrange
         String invalidJson = "{\"pathParameters\": {\"userId\": \"\"}}";
         JsonObject invalidJsonObj = JsonParser.parseString(invalidJson).getAsJsonObject();
+        RequestWrapper requestWrapper = new RequestWrapper(invalidJsonObj);
 
         //Act
-        boolean isSuccessful = RequestObjectValidator.validateRequest(invalidJsonObj);
+        boolean isSuccessful = requestWrapper.isValidRequest();
 
         //Assert
         assertFalse(isSuccessful);
+    }
+
+    @Test
+    @DisplayName("Test convert request to json format.")
+    public void testGetRequestAsJson() {
+        //Arrange
+        String getUserJson = "{\"pathParameters\": {\"userId\": \"valid Id\"}}";
+        JsonObject getUserRequest = JsonParser.parseString(getUserJson).getAsJsonObject();
+        RequestWrapper requestWrapper = new RequestWrapper(getUserRequest);
+
+        //Act
+        String actual = requestWrapper.getRequestAsJson();
+        String expected = "{\"userId\":\"valid Id\"}";
+
+        //Assert
+        assertEquals(actual, expected);
     }
 
 }

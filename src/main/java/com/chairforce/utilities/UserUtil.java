@@ -10,9 +10,8 @@ import java.util.Optional;
 
 public class UserUtil {
 
-    Gson gson = new Gson();
-
-    UserDynamoDbDao userDynamoDbDao;
+    private final Gson gson = new Gson();
+    private final UserDynamoDbDao userDynamoDbDao;
 
     public UserUtil(UserDynamoDbDao userDynamoDbDao) {
         this.userDynamoDbDao = userDynamoDbDao;

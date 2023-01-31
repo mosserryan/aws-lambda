@@ -26,19 +26,25 @@ public class UserDynamoDbDao {
     }
 
     public Optional<User> deleteUserById(String userId) {
-        Optional<User> deletedUser = getUserById(userId);
-        if (deletedUser.isEmpty()) {
+        Optional<User> targetUser = getUserById(userId);
+        if (targetUser.isEmpty()) {
             return Optional.empty();
         } else {
-            dynamoDBMapper.delete(deletedUser.get());
-            return deletedUser;
+            dynamoDBMapper.delete(targetUser.get());
+            return targetUser;
         }
     }
 
-    public User updateUserById(String userId, User user) {
+    public Optional<User> updateUserById(String userId, User user) {
         ExpectedAttributeValue expectedAttributeValue = new ExpectedAttributeValue((new AttributeValue()).withS(userId));
         DynamoDBSaveExpression dynamoDBSaveExpression = (new DynamoDBSaveExpression()).withExpectedEntry("UserId", expectedAttributeValue);
-        this.dynamoDBMapper.save(user, dynamoDBSaveExpression);
-        return user;
+
+        Optional<User> targetUser = getUserById(userId);
+        if (targetUser.isEmpty()) {
+            return Optional.empty();
+        } else {
+            dynamoDBMapper.save(user, dynamoDBSaveExpression);
+            return getUserById(userId);
+        }
     }
 }

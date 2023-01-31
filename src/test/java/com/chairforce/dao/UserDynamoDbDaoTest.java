@@ -1,6 +1,5 @@
 package com.chairforce.dao;
 
-
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.chairforce.entities.User;
 import com.google.gson.Gson;
@@ -11,11 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +31,43 @@ public class UserDynamoDbDaoTest {
         String jsonString =
                 "{\"firstName\":\"testUser\",\"lastName\":\"testUser\",\"email\":\"testUser\",\"age\":\"10\" }";
         user = gson.fromJson(jsonString, User.class);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception when the user does not exist")
+    void updateUserByIdWhenUserDoesNotExistThenThrowException() {
+        when(userDynamoDbDao.getUserById("1")).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> userDynamoDbDao.updateUserById("1", user));
+    }
+
+    @Test
+    @DisplayName("Should update the user when the user exists")
+    void updateUserByIdWhenUserExists() {
+        // Arrange
+        when(dynamoDBMapper.load(User.class, "validId")).thenReturn(user);
+
+        // Act
+        Optional<User> updatedUser = userDynamoDbDao.updateUserById("validId", user);
+
+        // Assert
+        assertTrue(updatedUser.isPresent());
+        assertEquals(user, updatedUser.get());
+        verify(dynamoDBMapper, times(2)).load(User.class, "validId");
+        //verify(dynamoDBMapper, times(2)).save(user,new DynamoDBSaveExpression().withExpectedEntry("UserId", new ExpectedAttributeValue((new AttributeValue()).withS("validId"))));
+    }
+
+    @Test
+    @DisplayName("Should return Optional empty when user Id is not found.")
+    void updateUserByIdWhenUserDoesNotExists() {
+        // Arrange
+        when(dynamoDBMapper.load(User.class, "testUser")).thenReturn(null);
+
+        // Act
+        Optional<User> updatedUser = userDynamoDbDao.updateUserById("testUser", user);
+
+        // Assert
+        assertFalse(updatedUser.isPresent());
+        verify(dynamoDBMapper, times(1)).load(User.class, "testUser");
     }
 
     @Test
@@ -96,9 +130,11 @@ public class UserDynamoDbDaoTest {
     @DisplayName("Should save the user")
     public void testCreateUserShouldSaveTheUser() {
         // Arrange - Act
-        userDynamoDbDao.createUser(user);
+        User actual = userDynamoDbDao.createUser(user);
+        User expected = user;
 
         // Assert
+        assertEquals(expected, actual);
         verify(dynamoDBMapper, times(1)).save(user);
     }
 }
