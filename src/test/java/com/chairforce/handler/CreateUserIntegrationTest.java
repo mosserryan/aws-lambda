@@ -30,7 +30,6 @@ public class CreateUserIntegrationTest {
         }).when(loggerMock).log(anyString());
 
         outputStream = new ByteArrayOutputStream();
-
     }
 
     @Test
@@ -38,6 +37,5 @@ public class CreateUserIntegrationTest {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("CreateUser");
         createUserLambda.handleRequest(inputStream, outputStream, mockedContext);
     }
-
 
 }
