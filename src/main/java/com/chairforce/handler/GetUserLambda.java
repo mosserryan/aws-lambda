@@ -31,7 +31,6 @@ public class GetUserLambda implements RequestStreamHandler {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         try {
-
             JsonObject requestObj = JsonParser.parseReader(reader).getAsJsonObject();
             RequestWrapper request = new RequestWrapper(requestObj);
             JsonObject response;
@@ -62,7 +61,6 @@ public class GetUserLambda implements RequestStreamHandler {
                         .setSuccessBody(userJson)
                         .build();
             }
-
             writer.write(response.toString());
         } catch (IllegalStateException | JsonSyntaxException exception) {
             lambdaStatus.log(exception.toString());
@@ -70,6 +68,7 @@ public class GetUserLambda implements RequestStreamHandler {
             reader.close();
             writer.close();
         }
+
     }
 
 }

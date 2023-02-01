@@ -56,7 +56,7 @@ public class RequestWrapper {
             if (requestObj.has(reqType)) {
                 if (requestObj.get(reqType).isJsonPrimitive()) {
                     String element = requestObj.get(reqType).getAsString();
-                    requestObj = (JsonObject) JsonParser.parseString(element);
+                    requestObj = JsonParser.parseString(element).getAsJsonObject();
                 } else {
                     requestObj = requestObj.get(reqType).getAsJsonObject();
                 }
