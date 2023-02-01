@@ -6,20 +6,22 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.chairforce.dagger.DaggerConfig;
 import com.chairforce.entities.User;
 import com.chairforce.request.RequestWrapper;
-import com.chairforce.utilities.LambdaStatus;
 import com.chairforce.response.ResponseBuilder;
+import com.chairforce.utilities.LambdaStatus;
 import com.chairforce.utilities.UserUtil;
-import com.google.gson.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+
 import java.io.*;
 import java.util.Optional;
 
-
-public class GetUserLambda implements RequestStreamHandler {
+public class DeleteUserLambda implements RequestStreamHandler {
 
     private final LambdaStatus lambdaStatus = LambdaStatus.getInstance();
     private final UserUtil userUtil;
 
-    public GetUserLambda() {
+    public DeleteUserLambda() {
         userUtil = DaggerConfig.create().userUtil();
     }
 
@@ -46,7 +48,7 @@ public class GetUserLambda implements RequestStreamHandler {
                 return;
             }
 
-            Optional<User> user = userUtil.getUserFromJson(request.getRequestAsJson());
+            Optional<User> user = userUtil.deleteUserFromJson(request.getRequestAsJson());
             if (user.isEmpty()) {
                 lambdaStatus.log("Could not find specified User, with supplied input of: " + request.getRequestAsJson());
                 response = new ResponseBuilder()
@@ -55,7 +57,7 @@ public class GetUserLambda implements RequestStreamHandler {
                         .build();
             } else {
                 String userJson = userUtil.convertUserToJson(user.get());
-                lambdaStatus.log("Successfully found the following User: " + userJson);
+                lambdaStatus.log("Successfully deleted the following User: " + userJson);
                 response = new ResponseBuilder()
                         .setStatusCode(200)
                         .setSuccessBody(userJson)

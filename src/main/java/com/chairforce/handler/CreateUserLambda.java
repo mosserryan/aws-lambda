@@ -6,20 +6,20 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.chairforce.dagger.DaggerConfig;
 import com.chairforce.entities.User;
 import com.chairforce.request.RequestWrapper;
-import com.chairforce.utilities.LambdaStatus;
 import com.chairforce.response.ResponseBuilder;
+import com.chairforce.utilities.LambdaStatus;
 import com.chairforce.utilities.UserUtil;
-import com.google.gson.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import java.io.*;
-import java.util.Optional;
 
-
-public class GetUserLambda implements RequestStreamHandler {
+public class CreateUserLambda implements RequestStreamHandler {
 
     private final LambdaStatus lambdaStatus = LambdaStatus.getInstance();
     private final UserUtil userUtil;
 
-    public GetUserLambda() {
+    public CreateUserLambda() {
         userUtil = DaggerConfig.create().userUtil();
     }
 
@@ -31,8 +31,9 @@ public class GetUserLambda implements RequestStreamHandler {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         try {
-            JsonObject requestObj = JsonParser.parseReader(reader).getAsJsonObject();
+            JsonObject requestObj = (JsonObject) JsonParser.parseReader(reader);
             RequestWrapper request = new RequestWrapper(requestObj);
+
             JsonObject response;
             if (!request.isValidRequest()) {
                 lambdaStatus.log("Unable to validate invalid request of: " + request.getRequestAsJson());
@@ -46,21 +47,14 @@ public class GetUserLambda implements RequestStreamHandler {
                 return;
             }
 
-            Optional<User> user = userUtil.getUserFromJson(request.getRequestAsJson());
-            if (user.isEmpty()) {
-                lambdaStatus.log("Could not find specified User, with supplied input of: " + request.getRequestAsJson());
-                response = new ResponseBuilder()
-                        .setStatusCode(404)
-                        .setErrorBody("Resource not found")
-                        .build();
-            } else {
-                String userJson = userUtil.convertUserToJson(user.get());
-                lambdaStatus.log("Successfully found the following User: " + userJson);
-                response = new ResponseBuilder()
-                        .setStatusCode(200)
-                        .setSuccessBody(userJson)
-                        .build();
-            }
+            User user = userUtil.createUserFromJson(request.getRequestAsJson());
+            String userJson = userUtil.convertUserToJson(user);
+            lambdaStatus.log("Successfully created the following User: " + userJson);
+            response = new ResponseBuilder()
+                    .setStatusCode(200)
+                    .setSuccessBody(userJson)
+                    .build();
+
             writer.write(response.toString());
         } catch (IllegalStateException | JsonSyntaxException exception) {
             lambdaStatus.log(exception.toString());

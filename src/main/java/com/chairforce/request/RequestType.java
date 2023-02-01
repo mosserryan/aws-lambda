@@ -6,7 +6,7 @@ public enum RequestType {
 
     PATH_PARAMETERS("pathParameters"),
     QUERY_STRING_PARAMETERS("queryStringParameters"),
-    REQUEST_BODY("body");
+    BODY("body");
 
     public final String value;
 
@@ -15,6 +15,18 @@ public enum RequestType {
     }
 
     public static List<String> getStringValues() {
-        return List.of(PATH_PARAMETERS.value, QUERY_STRING_PARAMETERS.value, REQUEST_BODY.value);
+        return List.of(PATH_PARAMETERS.value, QUERY_STRING_PARAMETERS.value, BODY.value);
+    }
+
+    public static List<String> getStringValues(String httpMethod) {
+        switch(httpMethod) {
+            case "POST":
+            case "PUT":
+                return List.of(BODY.value);
+            case "DELETE":
+            case "GET":
+                return List.of(PATH_PARAMETERS.value, QUERY_STRING_PARAMETERS.value);
+        }
+        return getStringValues();
     }
 }

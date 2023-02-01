@@ -2,9 +2,7 @@ package com.chairforce.request;
 
 import com.chairforce.entities.UserType;
 import com.chairforce.utilities.LambdaStatus;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,9 +21,7 @@ public class RequestWrapper {
     private List<String> requiredKeyValues;
     private JsonObject requestObj;
     private boolean isValidRequest = false;
-
     private final Gson gson = new Gson();
-
     private final LambdaStatus lambdaStatus = LambdaStatus.getInstance();
 
     /**
@@ -50,11 +46,21 @@ public class RequestWrapper {
     }
 
     private boolean hasValidReqType() {
-        List<String> keys =  RequestType.getStringValues();
-        for (String key : keys) {
-            if (requestObj.has(key)) {
-                requestObj = requestObj.get(key).getAsJsonObject();
-                requiredKeyValues = UserType.requiredUserValues(key);
+        List<String> reqTypes;
+        if (requestObj.has("httpMethod")) {
+            reqTypes = RequestType.getStringValues(requestObj.get("httpMethod").getAsString());
+        } else {
+            reqTypes = RequestType.getStringValues();
+        }
+        for (String reqType : reqTypes) {
+            if (requestObj.has(reqType)) {
+                if (requestObj.get(reqType).isJsonPrimitive()) {
+                    String element = requestObj.get(reqType).getAsString();
+                    requestObj = JsonParser.parseString(element).getAsJsonObject();
+                } else {
+                    requestObj = requestObj.get(reqType).getAsJsonObject();
+                }
+                requiredKeyValues = UserType.requiredUserValues(reqType);
                 return true;
             }
         }
